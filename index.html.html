@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classeur Pokémon</title>
+<style>
+:root{--red:#e3350d;--blue:#3b5ba5;--cover:#22389b;--cover-d:#16257a;--yel:#ffcb05;--ink:#1a1f36;--mut:#5d6585;--paper:#f4f7ff;--page:#ffffff;--slot:#dfe7fb;--line:#c5cfee;--hit:#ff2d78;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#10152c;--page:#1b2244;--slot:#262f5c;--line:#34407a;--ink:#eef1ff;--mut:#a3acd6;--cover:#18276d;--cover-d:#0f1a52}}
+:root[data-theme="dark"]{--paper:#10152c;--page:#1b2244;--slot:#262f5c;--line:#34407a;--ink:#eef1ff;--mut:#a3acd6;--cover:#18276d;--cover-d:#0f1a52}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.4 "Trebuchet MS","Avenir Next","Segoe UI",system-ui,sans-serif}
+.hd{background:var(--red);border-bottom:5px solid #1a1a1a;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;color:#fff}
+.lens{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 3px #1a1a1a;background:radial-gradient(circle at 35% 30%,#d6f3ff 0 10%,#39a0ff 38%,#0d3f8f 100%)}
+.dots{display:flex;gap:6px}.dots i{width:12px;height:12px;border-radius:50%;border:2px solid #1a1a1a}
+.dots i:nth-child(1){background:#ff6b6b}.dots i:nth-child(2){background:var(--yel)}.dots i:nth-child(3){background:#46d160}
+.ttl{flex:1 1 220px}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.3px;line-height:1.1}
+.ttl p{margin:2px 0 0;font-size:13px;opacity:.92}
+.hs{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end}
+.hs div{min-width:130px}
+.hs small{display:block;font-size:11px;opacity:.9}
+.hs b{font-size:17px}
+.bar{height:8px;background:rgba(0,0,0,.28);border-radius:4px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;width:0;background:var(--yel)}
+.tb{background:var(--page);border-bottom:2px solid var(--line);padding:8px 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+label{display:flex;flex-direction:column;font-size:11px;color:var(--mut);gap:2px;font-weight:700}
+select,input[type=search],input[type=number]{font:inherit;font-weight:400;padding:6px 9px;border:2px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);min-width:130px;max-width:100%}
+.seg{display:flex;flex-wrap:wrap;border:2px solid var(--blue);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-weight:700;border:0;padding:7px 12px;background:var(--page);color:var(--blue);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--yel);color:#1a1f36}
+.btn{font:inherit;font-weight:700;border:2px solid #1a1a1a;background:var(--yel);color:#1a1f36;border-radius:9px;padding:7px 12px;cursor:pointer}
+.chk{flex-direction:row;align-items:center;gap:6px;font-size:13px;color:var(--ink)}
+.info{padding:0 20px;font-size:13px;color:var(--mut)}
+#err{color:var(--hit);font-weight:700}
+#res{padding:0 20px;display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+#res button{font:inherit;font-size:13px;border:2px solid var(--line);background:var(--page);color:var(--ink);border-radius:14px;padding:3px 10px;cursor:pointer}
+.stage{position:relative}
+.binder{position:relative;width:100%;background:linear-gradient(180deg,var(--cover),var(--cover-d));padding:14px 64px;display:flex;align-items:stretch;min-height:300px}
+.page{flex:1 1 0;min-width:0;background:var(--page);border-radius:8px;padding:10px 12px;box-shadow:inset 0 0 0 2px var(--line)}
+.page.blank{background:transparent;box-shadow:none}
+.spine{flex:0 0 30px;margin:0 4px;background:radial-gradient(circle,#eef1ff 0 6px,#8e97c9 7px 9px,transparent 10px) 50% 0/30px 96px repeat-y}
+.pl{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:6px;gap:8px;font-weight:700}
+.grid{display:grid;gap:8px}
+/* emplacements */
+.slot{aspect-ratio:63/88;background:var(--slot);border:2px solid var(--line);border-radius:8px;padding:6px;text-align:left;color:var(--ink);font:inherit;position:relative;cursor:pointer;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease;transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+.slot:hover{z-index:3;box-shadow:0 10px 22px rgba(10,14,40,.35)}
+.slot.empty{opacity:.25;cursor:default;border-style:dashed}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:6px;filter:grayscale(.9) brightness(.85)}
+.slot.own img{filter:none}
+.slot.t-u{border-color:#a9b4d8}.slot.t-r{border-color:#e3b400}.slot.t-x{border-color:#c04bff}
+.slot.own{border-color:var(--yel);box-shadow:0 0 0 2px var(--yel)}
+.slot .t{position:relative;display:flex;flex-direction:column;gap:2px}
+.slot .t b{font-size:12px}.slot .t span{font-size:13px;font-weight:700;line-height:1.15}
+.slot.img .t{visibility:hidden}
+.badge{position:absolute;right:4px;top:4px;z-index:2;font-size:10px;font-weight:800;line-height:1;padding:3px 5px;border-radius:9px;background:var(--blue);color:#fff}
+.v-r .badge{background:#1f8fd6}.v-h .badge{background:#c98a00}.v-f .badge{background:#7a3db8}
+.px{position:absolute;left:4px;bottom:4px;z-index:2;font-size:11px;font-weight:800;padding:2px 6px;border-radius:8px;background:rgba(10,14,40,.82);color:#fff}
+.ra{position:absolute;right:4px;bottom:4px;z-index:2;font-size:12px;line-height:1;padding:3px 5px;border-radius:8px;background:rgba(10,14,40,.82)}
+.ra-c{color:#e8ecff}.ra-u{color:#c9d3ff}.ra-r{color:#ffd23f}.ra-x{color:#ff7bd5;text-shadow:0 0 6px #ffd23f}
+.ck{position:absolute;left:4px;top:4px;z-index:2;width:20px;height:20px;border-radius:50%;background:var(--yel);color:#1a1f36;font-weight:900;font-size:13px;line-height:20px;text-align:center;border:2px solid #1a1a1a}
+/* effet holo : arc-en-ciel sur toute la carte, suit le pointeur */
+.fx-h::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;z-index:1;mix-blend-mode:color-dodge;opacity:.5;
+ background:radial-gradient(circle at var(--mx,30%) var(--my,20%),rgba(255,255,255,.75),transparent 38%),linear-gradient(115deg,#ff2d95,#ff9a1f,#ffe930,#37f2a0,#2fb4ff,#8a4dff,#ff2d95);background-size:100% 100%,260% 260%;background-position:0 0,var(--mx,40%) var(--my,40%)}
+.fx-h:hover::after{opacity:.85}
+.slot:not(.own).fx-h::after,.slot:not(.own).fx-r::after{opacity:.3}
+/* effet reverse : reflet argenté sur le cadre uniquement, l'illustration reste mate */
+.fx-r::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;z-index:1;opacity:.75;
+ background:repeating-linear-gradient(60deg,rgba(255,255,255,.0) 0 7px,rgba(255,255,255,.28) 7px 9px),linear-gradient(115deg,rgba(150,210,255,.55),rgba(255,255,255,.65) 45%,rgba(190,170,255,.5));background-size:100% 100%,220% 220%;background-position:0 0,var(--mx,40%) var(--my,40%);
+ -webkit-mask-image:linear-gradient(#000,#000),linear-gradient(#000,#000);mask-image:linear-gradient(#000,#000),linear-gradient(#000,#000);
+ -webkit-mask-size:100% 100%,84% 38%;mask-size:100% 100%,84% 38%;-webkit-mask-position:0 0,50% 17%;mask-position:0 0,50% 17%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-composite:xor;mask-composite:exclude}
+.fx-r:hover::after{opacity:1}
+.slot.hit{outline:4px solid var(--hit);animation:p 1s 2}
+@keyframes p{50%{outline-offset:3px}}
+/* tourne-page */
+.flip{position:absolute;inset:0;perspective:2600px;pointer-events:none;z-index:6}
+.staticp{position:absolute;overflow:hidden;border-radius:8px;background:var(--cover)}
+.staticp .page,.face .page{width:100%;height:100%;flex:none;margin:0}
+.leaf{position:absolute;transform-style:preserve-3d;transition:transform var(--flip,.9s) cubic-bezier(.5,.05,.25,1)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:8px;overflow:hidden;background:var(--page);box-shadow:0 8px 26px rgba(0,0,0,.4)}
+.face.back{transform:rotateY(180deg)}
+.arr{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:64px;border-radius:12px;border:2px solid #1a1a1a;background:var(--yel);color:#1a1f36;font-size:28px;font-weight:900;cursor:pointer}
+.arr.l{left:10px}.arr.r{right:10px}.arr:disabled{opacity:.3;cursor:default}
+nav{display:flex;gap:10px;align-items:center;justify-content:center;padding:8px 16px}
+nav button{font:inherit;font-weight:700;padding:7px 16px;border-radius:9px;border:2px solid #1a1a1a;background:var(--yel);color:#1a1f36;cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+nav{flex-wrap:wrap}
+.jump{flex-direction:row;align-items:center;gap:6px;font-size:13px;color:var(--ink)}
+.jump input{width:78px;min-width:0;padding:5px 8px}
+.jump button{padding:6px 12px}
+.scrub{padding:0 20px 10px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:12px;color:var(--mut);font-weight:700}
+.scrub input{width:min(520px,70vw)}
+input[type=range]{accent-color:var(--red);cursor:pointer;min-width:0}
+.anim{min-width:170px}
+.anim input{width:150px}
+.anim output{font-weight:700;color:var(--ink);font-size:12px}
+body.focus .scrub{display:none}
+dialog#pf{border:3px solid #1a1a1a;border-radius:14px;background:var(--page);color:var(--ink);padding:0;width:min(540px,94vw);max-height:90vh;overflow:auto}
+dialog#pf::backdrop{background:rgba(10,14,40,.6)}
+.pfh{display:flex;align-items:center;justify-content:space-between;background:var(--red);color:#fff;padding:10px 16px}
+.pfh h2{margin:0;font-size:18px}
+.pfh button{font:inherit;font-weight:900;border:2px solid #1a1a1a;background:var(--yel);color:#1a1f36;border-radius:8px;padding:2px 10px;cursor:pointer}
+.pfb{padding:12px 16px;border-top:2px solid var(--line)}
+.pfb:first-of-type{border-top:0}
+.pfb h3{margin:0 0 6px;font-size:14px}
+.pfb p{margin:4px 0 8px;font-size:12px;color:var(--mut)}
+.pfr{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.pfr input[type=text],.pfr select{flex:1 1 150px;min-width:0}
+#pf textarea{width:100%;min-height:70px;font:12px/1.3 ui-monospace,Menlo,Consolas,monospace;padding:6px 8px;border:2px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);resize:vertical}
+.btn.sec{background:var(--page);color:var(--blue);border-color:var(--blue)}
+.btn.dng{background:#fff;color:#c4162a;border-color:#c4162a}
+#pf-msg{padding:10px 16px;font-size:13px;font-weight:700;min-height:40px;border-top:2px solid var(--line)}
+#pf-msg.bad{color:var(--hit)}
+.note{padding:0 20px 24px;color:var(--mut);font-size:12px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--hit);outline-offset:2px}
+body.focus #top,body.focus .note,body.focus nav{display:none}
+#fsx{display:none}
+/* plein écran : le classeur occupe tout l'écran, bouton de sortie discret sur la reliure */
+body.focus .stage,body.focus .binder{min-height:100vh;min-height:100dvh}
+body.focus .binder{padding-top:12px;padding-bottom:12px}
+body.focus .page{display:flex;flex-direction:column}
+body.focus .grid{margin-block:auto}
+body.focus #fsx{display:block;position:fixed;z-index:20;top:12px;left:50%;transform:translateX(-50%);width:30px;height:30px;padding:0;border-radius:50%;font-size:14px;line-height:1;opacity:.45;transition:opacity .2s}
+body.focus #fsx:hover,body.focus #fsx:focus-visible{opacity:1}
+@media (prefers-reduced-motion:reduce){.slot{transition:none;transform:none!important}.slot.hit{animation:none}}
+@media (max-width:820px){
+ body.focus #fsx{left:auto;right:10px;transform:none;top:10px}
+ .binder{flex-wrap:wrap;padding:10px;gap:8px}.page{flex:1 1 100%}.spine{display:none}.arr{display:none}
+ .hd{padding:10px 12px}.tb,.info,#res,.note{padding-left:12px;padding-right:12px}
+}
+</style>
+</head>
+<body>
+<div id="top">
+ <header class="hd">
+  <div class="lens"></div><div class="dots"><i></i><i></i><i></i></div>
+  <div class="ttl"><h1>Classeur Pokémon</h1><p id="sub">Données TCGdex</p></div>
+  <div class="hs">
+   <div><small>Collection</small><b id="st">0 / 0</b><div class="bar"><i id="bar"></i></div></div>
+   <div><small>Valeur possédée / totale</small><b id="val">—</b></div>
+  </div>
+ </header>
+ <div class="tb">
+  <label>Langue<select id="lang"><option value="fr">Français</option><option value="en">English</option></select></label>
+  <label>Série<select id="ser"></select></label>
+  <label>Extension<select id="set"></select></label>
+  <label>Mode<div class="seg" id="mode">
+   <button data-m="normal" aria-pressed="true">Normal</button>
+   <button data-m="master" aria-pressed="false">Master set</button></div></label>
+  <label>Page<select id="fmt"><option>3x3</option><option selected>4x3</option><option>4x4</option><option>2x2</option></select></label>
+  <label>Prix<select id="cur"><option value="eur">Cardmarket (€)</option><option value="usd">TCGplayer ($)</option><option value="off">Masqués</option></select></label>
+  <label>1re page à<select id="first1"><option value="0">Droite (comme un livre)</option><option value="1">Gauche</option></select></label>
+  <label class="chk"><input type="checkbox" id="fit" checked> Ajuster à l'écran</label>
+  <label class="anim">Animation des pages : <output id="animl"></output><input type="range" id="anim" min="0" max="5" step="1" value="3" aria-label="Animation des pages : 0 désactivée, 5 très rapide"></label>
+  <label>Où est cette carte ?<input type="search" id="q" placeholder="Nom du Pokémon"></label>
+  <button class="btn" id="pfb" aria-haspopup="dialog" title="Profils et sauvegarde"></button>
+  <button class="btn" id="fs">Plein écran</button>
+ </div>
+ <div class="info"><div id="err"></div><div id="load"></div><div id="mi"></div></div>
+ <div id="res"></div>
+</div>
+<button class="btn" id="fsx" aria-label="Quitter le plein écran" title="Quitter le plein écran (Échap)">✕</button>
+<div class="stage">
+ <button class="arr l" id="prev2" aria-label="Pages précédentes">‹</button>
+ <div class="binder" id="binder"></div>
+ <button class="arr r" id="next2" aria-label="Pages suivantes">›</button>
+</div>
+<nav>
+ <button id="first" title="Première page (Début)" aria-label="Première page">⏮</button>
+ <button id="prev">Précédent</button>
+ <span id="pn"></span>
+ <button id="next">Suivant</button>
+ <button id="last" title="Dernière page (Fin)" aria-label="Dernière page">⏭</button>
+ <label class="jump">Aller à la page <input type="number" id="pg" min="1" value="1" inputmode="numeric"> <button id="gopg">OK</button></label>
+</nav>
+<div class="scrub"><span>Début</span><input type="range" id="scrub" min="0" max="0" value="0" aria-label="Parcourir le classeur"><span>Fin</span></div>
+<dialog id="pf" aria-labelledby="pf-t">
+ <div class="pfh"><h2 id="pf-t">Profils et sauvegarde</h2><button id="pf-x" aria-label="Fermer">✕</button></div>
+ <div class="pfb">
+  <h3>Profil actif</h3>
+  <div class="pfr"><select id="pf-sel" aria-label="Profil actif"></select></div>
+  <div class="pfr"><input type="text" id="pf-name" maxlength="30" placeholder="Pseudo (pas de nom réel)" autocomplete="off">
+   <button class="btn" id="pf-new">Nouveau</button>
+   <button class="btn sec" id="pf-ren">Renommer</button>
+   <button class="btn dng" id="pf-del">Supprimer</button></div>
+  <p>Un profil = un pseudo et sa propre collection. Aucune donnée personnelle : tout reste dans ce navigateur.</p>
+ </div>
+ <div class="pfb">
+  <h3>Sauvegarder / restaurer</h3>
+  <p>L'export contient tous les profils de cet appareil. À l'import, un profil de même pseudo est fusionné (aucune carte n'est retirée), sinon il est créé.</p>
+  <div class="pfr"><button class="btn" id="pf-exp">Exporter un fichier</button>
+   <button class="btn sec" id="pf-imp">Importer un fichier</button>
+   <input type="file" id="pf-file" accept=".json,.txt,application/json,text/plain" hidden></div>
+  <div class="pfr"><button class="btn" id="pf-code">Générer / copier le code</button>
+   <button class="btn sec" id="pf-codeimp">Importer le code</button></div>
+  <textarea id="pf-ta" spellcheck="false" placeholder="Le code de sauvegarde apparaît ici. Pour restaurer sur un autre appareil, colle-le ici puis « Importer le code »."></textarea>
+ </div>
+ <div id="pf-msg" role="status" aria-live="polite"></div>
+</dialog>
+<p class="note">Touchez un emplacement pour le marquer comme possédé : les cartes non possédées sont en noir et blanc. Badges : N normale, R reverse, H holo, 1 première édition. Symboles de rareté : ● commune, ◆ peu commune, ★ rare ou mieux. Reflet arc-en-ciel sur l'illustration : carte holo ; reflet argenté sur le cadre : reverse. Prix : tendance Cardmarket en euros ou prix du marché TCGplayer en dollars, selon ce que TCGdex fournit pour la carte ; ils sont mis à jour une fois par jour et peuvent manquer. Données et images : TCGdex (connexion internet requise). La progression est gardée dans ce navigateur, par profil ; le bouton « Profil » permet de changer de profil et de sauvegarder ou restaurer sa collection.</p>
+<script>
+const API='https://api.tcgdex.net/v2/';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* profils : un pseudo = une collection (stockage local, aucune donnée perso) */
+let profiles=[],curProf='',owned=new Set();
+const ownKey=id=>id==='default'?'own2':'own2:'+id;
+function readOwned(id){try{const a=JSON.parse(localStorage.getItem(ownKey(id))||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+function loadOwned(){owned=new Set(readOwned(curProf))}
+function loadProfiles(){
+ try{profiles=JSON.parse(localStorage.getItem('profiles')||'[]')}catch(e){profiles=[]}
+ if(!Array.isArray(profiles)||!profiles.length)profiles=[{id:'default',name:'Mon classeur'}];
+ try{curProf=localStorage.getItem('profile')||''}catch(e){}
+ if(!profiles.some(p=>p.id===curProf))curProf=profiles[0].id;
+ loadOwned();
+}
+const saveProfiles=()=>{try{localStorage.setItem('profiles',JSON.stringify(profiles));localStorage.setItem('profile',curProf)}catch(e){}};
+const save=()=>{try{localStorage.setItem(ownKey(curProf),JSON.stringify([...owned]))}catch(e){}};
+loadProfiles();
+const VL={n:'Normale',r:'Reverse holo',h:'Holo',f:'1re édition'},BD={n:'N',r:'R',h:'H',f:'1'};
+const INFO={
+ normal:'Normal : une carte par numéro du set officiel (sans les cartes secrètes), en version de base.',
+ master:'Master set : chaque carte de l\'extension avec toutes ses versions (normale, reverse, holo, 1re édition), côte à côte.'};
+const ANIM_MS=[0,1600,1200,900,600,350],ANIM_NAME=['Désactivée','Très lente','Lente','Normale','Rapide','Très rapide'];
+let animLvl=3;
+let LO=0; /* 0 : la page 1 est à droite (page de gauche vide) ; 1 : la page 1 est à gauche */
+try{LO=localStorage.getItem('first1')==='1'?1:0}catch(e){}
+try{const a=localStorage.getItem('anim');
+ if(a!==null&&+a>=0&&+a<=5)animLvl=+a;
+ else if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)animLvl=0}catch(e){}
+function applyAnim(){
+ $('#anim').value=animLvl;
+ $('#animl').textContent=animLvl?ANIM_NAME[animLvl]+' ('+(ANIM_MS[animLvl]/1000).toLocaleString('fr-FR')+' s)':ANIM_NAME[0];
+ document.documentElement.style.setProperty('--flip',ANIM_MS[animLvl||3]+'ms');
+}
+const st={lang:'fr',series:[],serie:'',sets:[],setId:'',set:null,vars:{},mode:'normal',fmt:'4x3',cur:'eur',sp:0,hl:'',tok:0,pending:'',allSets:null};
+let slots=[],busy=false;
+
+async function j(p){const r=await fetch(API+p);if(!r.ok)throw new Error('HTTP '+r.status+' sur '+p);return r.json()}
+const err=m=>{$('#err').textContent=m||''};
+const netErr=e=>err('Impossible de joindre TCGdex ('+e.message+'). Vérifiez votre connexion internet ou essayez un autre navigateur.');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* rareté */
+const HOLO=/holo|ultra|secret|hyper|illustration|rainbow|arc-en|amazing|shiny|chromatique|radiant|legend|légende|prism|crown|couronne|mega|méga|double|doublement|full art|spécial|special|ace/;
+function tierOf(ra){
+ const s=String(ra||'').toLowerCase();if(!s||s==='none')return '';
+ if(/peu commune|uncommon/.test(s))return 'u';
+ if(/commune|common/.test(s))return 'c';
+ if(HOLO.test(s)&&!/^rare$/.test(s))return /holo rare|rare holo/.test(s)?'r':'x';
+ return 'r';
+}
+const GL={c:'●',u:'◆',r:'★',x:'★'};
+
+async function loadSeries(){
+ err('');$('#load').textContent='Chargement des séries…';
+ try{st.series=await j(st.lang+'/series')}catch(e){netErr(e);$('#load').textContent='';return}
+ if(!st.series.length){err('Aucune série reçue.');return}
+ $('#ser').innerHTML=st.series.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+ if(!st.series.some(s=>s.id===st.serie))st.serie=st.series[st.series.length-1].id;
+ $('#ser').value=st.serie;
+ await loadSets();
+}
+async function loadSets(){
+ try{const d=await j(`${st.lang}/series/${st.serie}`);st.sets=d.sets||[]}catch(e){netErr(e);$('#load').textContent='';return}
+ $('#set').innerHTML=st.sets.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+ if(!st.sets.some(s=>s.id===st.setId))st.setId=st.sets.length?st.sets[0].id:'';
+ $('#set').value=st.setId;
+ if(st.setId)await openSet();else{$('#load').textContent='';st.set=null;render()}
+}
+const today=()=>new Date().toISOString().slice(0,10);
+const cacheKey=()=>`var3-${st.lang}-${st.setId}`;
+function readCache(){try{const o=JSON.parse(localStorage.getItem(cacheKey())||'null');if(o&&o.d===today()&&o.c)return o.c}catch(e){}return{}}
+function writeCache(c){try{localStorage.setItem(cacheKey(),JSON.stringify({d:today(),c}))}catch(e){}}
+const vstr=v=>v?('n'.repeat(!!v.normal)+'r'.repeat(!!v.reverse)+'h'.repeat(!!v.holo)+'f'.repeat(!!v.firstEdition)):'';
+const pos=v=>typeof v==='number'&&v>0?v:null;
+function compact(d){
+ const o={v:vstr(d.variants),ra:d.rarity||''},pr=d.pricing||{};
+ const cm=pr.cardmarket;
+ if(cm){
+  const n=pos(cm.trend)||pos(cm.avg)||pos(cm.avg30)||pos(cm.low);
+  const h=pos(cm['trend-holo'])||pos(cm['avg-holo'])||pos(cm['avg30-holo'])||pos(cm['low-holo']);
+  if(n||h){o.cm={};if(n)o.cm.n=n;if(h)o.cm.h=h}
+ }
+ const tp=pr.tcgplayer;
+ if(tp){
+  const pick=(...ks)=>{for(const k of ks){const x=tp[k];if(x&&typeof x==='object'){const p=pos(x.marketPrice)||pos(x.midPrice)||pos(x.lowPrice);if(p)return p}}return null};
+  const t={n:pick('normal','unlimited'),r:pick('reverse','reverse-holofoil','reverse-holo','reverseHolofoil'),h:pick('holo','holofoil','unlimited-holofoil'),f:pick('1st-edition','1st-edition-holofoil')};
+  if(t.n||t.r||t.h||t.f)o.tp=t;
+ }
+ return o;
+}
+async function fetchCard(lang,id){
+ for(let a=0;a<3;a++){
+  try{return await j(`${lang}/cards/${id}`)}
+  catch(e){if(a===2)throw e;await sleep(300*(a+1))}
+ }
+}
+async function openSet(){
+ const tok=++st.tok;st.sp=0;st.hl='';err('');
+ $('#load').textContent='Chargement de l\'extension…';
+ let set;try{set=await j(`${st.lang}/sets/${st.setId}`)}catch(e){netErr(e);$('#load').textContent='';return}
+ if(tok!==st.tok)return;
+ st.set=set;st.vars={};render();
+ const cache=readCache();const cards=set.cards||[];
+ const todo=cards.filter(c=>!(c.id in cache));const total=todo.length;let done=0,failed=0;
+ const worker=async()=>{
+  while(todo.length){
+   const c=todo.shift();if(tok!==st.tok)return;
+   try{
+    const o=compact(await fetchCard(st.lang,c.id));
+    if(st.lang!=='en'&&!o.cm&&!o.tp){
+     try{const e=compact(await fetchCard('en',c.id));if(e.cm)o.cm=e.cm;if(e.tp)o.tp=e.tp;if(!o.ra&&e.ra)o.ra=e.ra}catch(x){}
+    }
+    cache[c.id]=o;
+   }catch(e){failed++}
+   done++;$('#load').textContent=`Chargement des versions et des prix : ${done} / ${total}`;
+  }};
+ await Promise.all(Array.from({length:6},worker));
+ if(tok!==st.tok)return;
+ writeCache(cache);st.vars=cache;$('#load').textContent='';
+ if(failed)err(failed+' carte(s) n\'ont pas pu être chargées (version et prix manquants). Rouvrez l\'extension pour réessayer.');
+ $('#sub').textContent=`${set.name}${set.releaseDate?' · sortie le '+set.releaseDate:''} · ${cards.length} cartes`;
+ render();
+ if(st.pending){const id=st.pending;st.pending='';locate(id)}
+}
+
+function build(){
+ const set=st.set;if(!set)return[];
+ const off=(set.cardCount&&set.cardCount.official)||0;const out=[];
+ for(const c of set.cards||[]){
+  const e=st.vars[c.id];const vs=(e&&e.v)||'n';const ra=(e&&e.ra)||'';const has=k=>vs.includes(k);
+  const base=has('n')?'n':has('h')?'h':has('r')?'r':(vs[0]||'n');
+  const holoish=HOLO.test(ra.toLowerCase());
+  const fxOf=v=>v==='r'?'fx-r':((v==='h'||((v==='n'||v==='f')&&holoish&&!has('h')))?'fx-h':'');
+  const mk=v=>({key:c.id+':'+v,id:c.id,v,num:c.localId,name:c.name,img:c.image,ra,tier:tierOf(ra),fx:fxOf(v)});
+  if(st.mode==='master'){const l=[...vs].filter(x=>'nrhf'.includes(x));(l.length?l:['n']).forEach(v=>out.push(mk(v)))}
+  else{const n=parseInt(c.localId,10);if(off&&(isNaN(n)||n>off))continue;out.push(mk(base))}
+ }
+ return out;
+}
+function priceOf(x){
+ if(st.cur==='off')return null;
+ const e=st.vars[x.id];if(!e)return null;
+ if(st.cur==='eur'){
+  const m=e.cm;if(!m)return null;
+  if(x.v==='n')return m.n||null;
+  if(x.v==='h'||x.v==='r'){
+   if(x.v==='r'&&e.v.includes('h'))return null;
+   if(m.h)return m.h;
+   return e.v.includes('n')?null:(m.n||null);
+  }
+  return null;
+ }
+ const t=e.tp;return t&&t[x.v]?t[x.v]:null;
+}
+const money=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:st.cur==='eur'?'EUR':'USD'}).format(n);
+const dims=()=>{const[c,r]=st.fmt.split('x').map(Number);return{c,r,per:c*r}};
+function pageHTML(p,per,c){
+ const items=slots.slice((p-1)*per,p*per);while(items.length<per)items.push(null);
+ let h=`<div class="page"><div class="pl"><span>Page ${p}</span><span>${esc(st.set?st.set.name:'')}</span></div><div class="grid" style="grid-template-columns:repeat(${c},1fr)">`;
+ items.forEach(x=>{
+  if(!x){h+='<div class="slot empty"></div>';return}
+  const own=owned.has(x.key),pr=priceOf(x);
+  const img=x.img?`<img src="${esc(x.img)}/high.webp" alt="${esc(x.name)} #${esc(x.num)}" loading="lazy" onerror="this.parentNode.classList.remove('img');this.remove()">`:'';
+  h+=`<button class="slot v-${x.v} t-${x.tier} ${x.fx}${x.img?' img':''}${own?' own':''}${st.hl===x.key?' hit':''}" data-key="${esc(x.key)}" title="${esc(x.name)} #${esc(x.num)} — ${VL[x.v]}${x.ra?' — '+esc(x.ra):''}${pr?' — '+money(pr):''}"><span class="badge">${BD[x.v]}</span>${own?'<span class="ck">✓</span>':''}${img}${pr?`<span class="px">${money(pr)}</span>`:''}${x.tier?`<span class="ra ra-${x.tier}">${GL[x.tier]}</span>`:''}<div class="t"><b>#${esc(x.num)}</b><span>${esc(x.name)}</span></div></button>`;
+ });
+ return h+'</div></div>';
+}
+function fit(){
+ const grids=document.querySelectorAll('.grid');if(!grids.length)return;
+ const{c,r}=dims();const gap=8;
+ if(!$('#fit').checked||innerWidth<=820){grids.forEach(g=>{g.style.gridTemplateColumns=`repeat(${c},1fr)`;g.style.justifyContent=''});return}
+ const foc=document.body.classList.contains('focus');
+ const topH=foc?0:$('#top').offsetHeight;
+ const availH=innerHeight-topH-28-20-26-(foc?4:50);
+ const slotH=(availH-(r-1)*gap)/r;
+ const pg=document.querySelector('.page:not(.blank)');
+ const maxW=(pg.clientWidth-24-(c-1)*gap)/c;
+ const w=Math.max(60,Math.min(slotH*63/88,maxW));
+ grids.forEach(g=>{g.style.gridTemplateColumns=`repeat(${c},${w}px)`;g.style.justifyContent='center'});
+}
+function render(){
+ slots=build();const{c,per}=dims();const P=Math.max(1,Math.ceil(slots.length/per));
+ const spreads=spreadsCount();st.sp=Math.min(st.sp,spreads-1);
+ const l=st.sp*2+LO,r=l+1;
+ let h=l>=1&&slots.length?pageHTML(l,per,c):'<div class="page blank"></div>';
+ h+='<div class="spine"></div>';
+ h+=r<=P&&slots.length?pageHTML(r,per,c):'<div class="page blank"></div>';
+ $('#binder').innerHTML=h;
+ const rr=Math.min(r,P);
+ $('#pn').textContent=(l<1?'Page 1':l>=rr?'Page '+l:'Pages '+l+'–'+rr)+' sur '+P;
+ $('#pg').max=P;$('#pg').value=Math.max(1,l);
+ $('#scrub').max=spreads-1;$('#scrub').value=st.sp;
+ const pv=st.sp===0,nx=st.sp>=spreads-1;
+ for(const id of ['#prev','#prev2','#first'])$(id).disabled=pv;
+ for(const id of ['#next','#next2','#last'])$(id).disabled=nx;
+ const o=slots.filter(x=>owned.has(x.key)).length;
+ $('#st').textContent=`${o} / ${slots.length} (${slots.length?Math.round(o*100/slots.length):0} %)`;
+ $('#bar').style.width=(slots.length?o*100/slots.length:0)+'%';
+ let tot=0,ov=0,np=0;
+ slots.forEach(x=>{const p=priceOf(x);if(!p){np++;return}tot+=p;if(owned.has(x.key))ov+=p});
+ $('#val').textContent=st.cur==='off'?'—':(tot?`${money(ov)} / ${money(tot)}`:'—')+(tot&&np?` (${np} sans prix)`:'');
+ $('#mi').textContent=INFO[st.mode];
+ fit();
+}
+/* animation tourne-page */
+const spreadsCount=()=>{const{per}=dims();const P=Math.max(1,Math.ceil(slots.length/per));return Math.floor((P-LO)/2)+1};
+const go=dir=>goTo(st.sp+dir);
+function goPage(p){const{per}=dims();const P=Math.max(1,Math.ceil(slots.length/per));p=Math.min(P,Math.max(1,Math.round(+p)||1));goTo(Math.floor((p-LO)/2))}
+function goTo(ns){
+ if(busy)return;
+ const spreads=spreadsCount();
+ ns=Math.min(spreads-1,Math.max(0,ns));
+ if(ns===st.sp){render();return}
+ const dir=ns>st.sp?1:-1;
+ const b=$('#binder');
+ const pages=b.querySelectorAll('.page');
+ if(!animLvl||innerWidth<=820||pages.length<2){st.sp=ns;st.hl='';render();return}
+ const br=b.getBoundingClientRect();
+ const oL=pages[0],oR=pages[1];
+ const rL=oL.getBoundingClientRect(),rR=oR.getBoundingClientRect();
+ const cL=oL.cloneNode(true),cR=oR.cloneNode(true);
+ st.sp=ns;st.hl='';render();
+ const np=b.querySelectorAll('.page');
+ const nL=np[0].cloneNode(true),nR=np[1].cloneNode(true);
+ busy=true;
+ const place=(el,r)=>{el.style.left=(r.left-br.left)+'px';el.style.top=(r.top-br.top)+'px';el.style.width=r.width+'px';el.style.height=r.height+'px'};
+ const gap=(rR.left-rL.right)/2;
+ const layer=document.createElement('div');layer.className='flip';
+ const stat=document.createElement('div');stat.className='staticp';place(stat,dir>0?rL:rR);stat.appendChild(dir>0?cL:cR);
+ const leaf=document.createElement('div');leaf.className='leaf';place(leaf,dir>0?rR:rL);
+ leaf.style.transformOrigin=dir>0?`${-gap}px 50%`:`${rL.width+gap}px 50%`;
+ const f=document.createElement('div');f.className='face front';f.appendChild(dir>0?cR:cL);
+ const k=document.createElement('div');k.className='face back';k.appendChild(dir>0?nL:nR);
+ leaf.append(f,k);layer.append(stat,leaf);b.appendChild(layer);
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{leaf.style.transform=`rotateY(${dir>0?-180:180}deg)`}));
+ setTimeout(()=>{layer.remove();busy=false},ANIM_MS[animLvl]+60);
+}
+function locate(cardId){
+ let i=slots.findIndex(s=>s.id===cardId);
+ if(i<0&&st.mode!=='master'){st.mode='master';document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m==='master'));render();i=slots.findIndex(s=>s.id===cardId)}
+ if(i<0){err('Cette carte n\'est pas dans la liste de cette extension.');return}
+ const{c,per}=dims(),p=Math.floor(i/per)+1,k=i%per;
+ st.sp=Math.floor((p-LO)/2);st.hl=slots[i].key;render();
+ $('#mi').textContent=`${slots[i].name} #${slots[i].num} : page ${p}, ligne ${Math.floor(k/c)+1}, colonne ${k%c+1}.`;
+ const el=document.querySelector('.slot.hit');if(el)el.scrollIntoView({block:'center'});
+}
+async function search(){
+ const q=$('#q').value.trim(),box=$('#res');
+ if(q.length<3){box.innerHTML='';return}
+ try{
+  if(!st.allSets){const a=await j(st.lang+'/sets');st.allSets=Object.fromEntries(a.map(s=>[s.id,s.name]))}
+  const r=await j(`${st.lang}/cards?name=${encodeURIComponent(q)}`);
+  box.innerHTML=r.length?r.slice(0,16).map(c=>{const sid=c.id.slice(0,c.id.lastIndexOf('-'));
+   return `<button data-card="${esc(c.id)}" data-set="${esc(sid)}">${esc(c.name)} #${esc(c.localId)} — ${esc(st.allSets[sid]||sid)}</button>`}).join(''):'<span>Aucune carte trouvée.</span>';
+ }catch(e){netErr(e)}
+}
+$('#res').onclick=async e=>{
+ const b=e.target.closest('button');if(!b)return;
+ const sid=b.dataset.set,cid=b.dataset.card;
+ if(sid===st.setId&&st.set){locate(cid);return}
+ try{const s=await j(`${st.lang}/sets/${sid}`);
+  st.serie=s.serie&&s.serie.id?s.serie.id:st.serie;st.setId=sid;st.pending=cid;
+  if(st.series.some(x=>x.id===st.serie))$('#ser').value=st.serie;
+  const d=await j(`${st.lang}/series/${st.serie}`);st.sets=d.sets||[];
+  $('#set').innerHTML=st.sets.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');$('#set').value=sid;
+  await openSet();
+ }catch(e2){netErr(e2)}
+};
+$('#binder').onclick=e=>{if(busy)return;const b=e.target.closest('.slot[data-key]');if(!b)return;
+ const k=b.dataset.key;owned.has(k)?owned.delete(k):owned.add(k);save();st.hl='';render()};
+/* reflets qui suivent le pointeur */
+$('#binder').addEventListener('pointermove',e=>{
+ const s=e.target.closest('.slot[data-key]');if(!s)return;
+ const r=s.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;
+ s.style.setProperty('--mx',(px*100).toFixed(1)+'%');s.style.setProperty('--my',(py*100).toFixed(1)+'%');
+ s.style.setProperty('--ry',((px-.5)*14).toFixed(1)+'deg');s.style.setProperty('--rx',((.5-py)*14).toFixed(1)+'deg');
+});
+$('#binder').addEventListener('pointerout',e=>{
+ const s=e.target.closest('.slot');if(!s)return;
+ for(const p of ['--mx','--my','--rx','--ry'])s.style.removeProperty(p);
+});
+$('#lang').onchange=e=>{st.lang=e.target.value;st.allSets=null;$('#res').innerHTML='';loadSeries()};
+$('#ser').onchange=e=>{st.serie=e.target.value;st.setId='';loadSets()};
+$('#set').onchange=e=>{st.setId=e.target.value;openSet()};
+$('#fmt').onchange=e=>{st.fmt=e.target.value;st.sp=0;render()};
+$('#cur').onchange=e=>{st.cur=e.target.value;render()};
+$('#fit').onchange=()=>fit();
+$('#mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;st.mode=b.dataset.m;st.sp=0;st.hl='';
+ document.querySelectorAll('#mode button').forEach(x=>x.setAttribute('aria-pressed',x===b));render()};
+let qt;$('#q').oninput=()=>{clearTimeout(qt);qt=setTimeout(search,400)};
+$('#prev').onclick=()=>go(-1);$('#prev2').onclick=()=>go(-1);$('#next').onclick=()=>go(1);$('#next2').onclick=()=>go(1);
+$('#first').onclick=()=>goTo(0);
+$('#last').onclick=()=>goTo(spreadsCount()-1);
+$('#gopg').onclick=()=>goPage($('#pg').value);
+$('#pg').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();goPage($('#pg').value)}};
+$('#scrub').oninput=e=>{const l=+e.target.value*2+LO;$('#pn').textContent=l<1?'Page 1':'Pages '+l+'–'+(l+1)+'…'};
+$('#first1').value=LO;
+$('#first1').onchange=e=>{
+ const cur=Math.max(1,st.sp*2+LO);
+ LO=+e.target.value;try{localStorage.setItem('first1',LO)}catch(x){}
+ st.sp=Math.max(0,Math.floor((cur-LO)/2));st.hl='';render()};
+$('#scrub').onchange=e=>goTo(+e.target.value);
+$('#anim').oninput=e=>{animLvl=+e.target.value;try{localStorage.setItem('anim',animLvl)}catch(x){}applyAnim()};
+function setFocus(on){
+ document.body.classList.toggle('focus',on);
+ if(on&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+ if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+ setTimeout(fit,50);
+}
+$('#fs').onclick=()=>setFocus(true);
+$('#fsx').onclick=()=>setFocus(false);
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('focus'))setFocus(false);else fit()});
+window.addEventListener('resize',fit);
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||pf.open)return;
+ if(e.key==='ArrowLeft')go(-1);
+ if(e.key==='ArrowRight')go(1);
+ if(e.key==='Home'){e.preventDefault();goTo(0)}
+ if(e.key==='End'){e.preventDefault();goTo(spreadsCount()-1)}
+ if(e.key==='PageUp'){e.preventDefault();go(-5)}
+ if(e.key==='PageDown'){e.preventDefault();go(5)}
+ if(e.key==='Escape'&&document.body.classList.contains('focus'))setFocus(false)});
+
+/* ---- dialogue profils & sauvegarde ---- */
+const pf=$('#pf');let delArm=false;
+const curName=()=>(profiles.find(p=>p.id===curProf)||profiles[0]).name;
+const msg=(t,bad)=>{const m=$('#pf-msg');m.textContent=t||'';m.className=bad?'bad':''};
+const cleanName=n=>String(n||'').replace(/\s+/g,' ').trim().slice(0,30);
+function uniq(n,exceptId){
+ let base=n,k=2;const taken=x=>profiles.some(p=>p.id!==exceptId&&p.name.toLowerCase()===x.toLowerCase());
+ while(taken(n))n=base.slice(0,26)+' '+k++;return n;
+}
+function pfFill(){
+ $('#pf-sel').innerHTML=profiles.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+ $('#pf-sel').value=curProf;$('#pf-name').value=curName();
+ $('#pfb').textContent='👤 '+curName();
+ delArm=false;$('#pf-del').textContent='Supprimer';
+}
+function switchTo(id){curProf=id;loadOwned();saveProfiles();st.hl='';pfFill();render()}
+$('#pfb').onclick=()=>{pfFill();msg('');$('#pf-ta').value='';if(pf.showModal)pf.showModal();else pf.setAttribute('open','')};
+$('#pf-x').onclick=()=>pf.close();
+pf.addEventListener('click',e=>{if(e.target===pf)pf.close()});
+$('#pf-sel').onchange=e=>{switchTo(e.target.value);msg('Profil « '+curName()+' » chargé.')};
+$('#pf-new').onclick=()=>{
+ const n=uniq(cleanName($('#pf-name').value)||'Joueur '+(profiles.length+1));
+ const id='p'+Date.now().toString(36);profiles.push({id,name:n});switchTo(id);msg('Profil « '+n+' » créé (collection vide).');
+};
+$('#pf-ren').onclick=()=>{
+ const n=cleanName($('#pf-name').value);if(!n){msg('Entre un pseudo.',true);return}
+ const p=profiles.find(x=>x.id===curProf);p.name=uniq(n,curProf);saveProfiles();pfFill();msg('Profil renommé en « '+p.name+' ».');
+};
+$('#pf-del').onclick=()=>{
+ if(profiles.length<2){msg('Impossible de supprimer le dernier profil.',true);return}
+ if(!delArm){delArm=true;$('#pf-del').textContent='Confirmer ?';msg('Clique encore pour supprimer « '+curName()+' » et sa collection. Pense à exporter avant.',true);return}
+ const old=curProf,name=curName();
+ try{localStorage.removeItem(ownKey(old))}catch(e){}
+ profiles=profiles.filter(p=>p.id!==old);switchTo(profiles[0].id);msg('Profil « '+name+' » supprimé.');
+};
+function snapshot(){return{app:'classeur-pokemon',v:1,exported:new Date().toISOString(),profiles:profiles.map(p=>({name:p.name,owned:readOwned(p.id)}))}}
+const b64=u=>{let t='';for(let i=0;i<u.length;i+=0x8000)t+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(t)};
+const unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+async function gz(u8,C){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new C('gzip'))).arrayBuffer())}
+async function makeCode(){
+ const u8=new TextEncoder().encode(JSON.stringify(snapshot()));
+ if(window.CompressionStream)try{return 'CPK1:'+b64(await gz(u8,CompressionStream))}catch(e){}
+ return 'CPK0:'+b64(u8);
+}
+async function parseText(t){
+ t=String(t).trim();
+ if(t[0]==='{')return JSON.parse(t);
+ t=t.replace(/\s+/g,'');const k=t.slice(0,5);let u8;
+ try{u8=unb64(t.slice(5))}catch(e){throw new Error('Code illisible')}
+ if(k==='CPK1:'){if(!window.DecompressionStream)throw new Error('Ce navigateur ne sait pas lire ce code');u8=await gz(u8,DecompressionStream)}
+ else if(k!=='CPK0:')throw new Error('Code non reconnu');
+ return JSON.parse(new TextDecoder().decode(u8));
+}
+function applyImport(o){
+ if(!o||o.app!=='classeur-pokemon'||!Array.isArray(o.profiles))throw new Error('Ce n\'est pas une sauvegarde du classeur');
+ let made=0,merged=0,added=0;
+ for(const ip of o.profiles.slice(0,50)){
+  const name=cleanName(ip&&ip.name)||'Importé';
+  const list=(Array.isArray(ip&&ip.owned)?ip.owned:[]).filter(k=>typeof k==='string'&&k.length<=60).slice(0,200000);
+  let p=profiles.find(x=>x.name.toLowerCase()===name.toLowerCase());
+  if(p)merged++;else{p={id:'p'+Date.now().toString(36)+made,name};profiles.push(p);made++}
+  const set=new Set(readOwned(p.id)),n0=set.size;list.forEach(k=>set.add(k));added+=set.size-n0;
+  try{localStorage.setItem(ownKey(p.id),JSON.stringify([...set]))}catch(e){}
+ }
+ saveProfiles();loadOwned();st.hl='';pfFill();render();
+ return `Import terminé : ${made} profil(s) créé(s), ${merged} fusionné(s), ${added} carte(s) ajoutée(s).`;
+}
+$('#pf-exp').onclick=()=>{
+ try{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(snapshot())],{type:'application/json'}));
+  a.download='classeur-pokemon-sauvegarde-'+today()+'.json';document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+  msg('Fichier exporté. Garde-le précieusement : c\'est ta seule sauvegarde.');
+ }catch(e){msg('Export impossible ici : utilise le code de sauvegarde.',true)}
+};
+$('#pf-imp').onclick=()=>$('#pf-file').click();
+$('#pf-file').onchange=async e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ try{msg(applyImport(await parseText(await f.text())))}catch(x){msg('Import impossible : '+x.message,true)}
+};
+$('#pf-code').onclick=async()=>{
+ const c=await makeCode(),ta=$('#pf-ta');ta.value=c;ta.focus();ta.select();
+ try{await navigator.clipboard.writeText(c);msg('Code copié ('+c.length+' caractères). Colle-le dans un message ou une note pour le garder.')}
+ catch(e){msg('Code généré : copie le texte sélectionné ci-dessus.')}
+};
+$('#pf-codeimp').onclick=async()=>{
+ const t=$('#pf-ta').value.trim();if(!t){msg('Colle d\'abord un code dans la zone de texte.',true);return}
+ try{msg(applyImport(await parseText(t)))}catch(x){msg('Import impossible : '+x.message,true)}
+};
+pfFill();
+applyAnim();render();loadSeries();
+</script>
+</body>
+</html>
